@@ -1,7 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
   <component name="ChangeListManager">
-    <list default="true" id="8167cf2d-2c8d-4fa7-8b6a-47e979f74ebd" name="Changes" comment="" />
+    <list default="true" id="8167cf2d-2c8d-4fa7-8b6a-47e979f74ebd" name="Changes" comment="INITIALISATION" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -10,11 +13,26 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
+  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
+  "lastFilter": {
+    "state": "OPEN",
+    "assignee": "cyriaquedbh"
+  }
+}]]></component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/cyriaquedbh/GP211-1.0.git",
+    "accountId": "3bc9ef9b-218b-4f17-a2a1-cb3783427cab"
+  }
+}]]></component>
   <component name="ProjectColorInfo"><![CDATA[{
   "associatedIndex": 8,
   "fromUser": false
 }]]></component>
   <component name="ProjectId" id="3ImAfhbeJw7VBa65RmCUl6nhu16" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="1" id="Add" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -23,6 +41,7 @@
   "keyToString": {
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.git.unshallow": "true",
     "RunOnceActivity.typescript.service.memoryLimit.init": "true",
     "codeWithMe.voiceChat.enabledByDefault": "false",
     "git-widget-placeholder": "master"
@@ -42,11 +61,51 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1788359474649</updated>
-      <workItem from="1788359475642" duration="2000" />
+      <workItem from="1788359475642" duration="256000" />
     </task>
+    <task id="LOCAL-00001" summary="INITIALISATION">
+      <option name="closed" value="true" />
+      <created>1788359605505</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1788359605505</updated>
+    </task>
+    <task id="LOCAL-00002" summary="INITIALISATION">
+      <option name="closed" value="true" />
+      <created>1788359618528</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1788359618528</updated>
+    </task>
+    <task id="LOCAL-00003" summary="INITIALISATION">
+      <option name="closed" value="true" />
+      <created>1788359708372</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1788359708372</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="INITIALISATION" />
+    <option name="LAST_COMMIT_MESSAGE" value="INITIALISATION" />
   </component>
 </project>
