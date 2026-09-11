@@ -4,9 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8167cf2d-2c8d-4fa7-8b6a-47e979f74ebd" name="Changes" comment="Trajectoire">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="8167cf2d-2c8d-4fa7-8b6a-47e979f74ebd" name="Changes" comment="interface" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -78,7 +76,7 @@
       <workItem from="1788359475642" duration="580000" />
       <workItem from="1788425188335" duration="25000" />
       <workItem from="1788425231705" duration="293000" />
-      <workItem from="1789109621869" duration="4877000" />
+      <workItem from="1789109621869" duration="5197000" />
     </task>
     <task id="LOCAL-00001" summary="INITIALISATION">
       <option name="closed" value="true" />
@@ -200,7 +198,23 @@
       <option name="project" value="LOCAL" />
       <updated>1789113599194</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="interface">
+      <option name="closed" value="true" />
+      <created>1789114644534</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1789114644534</updated>
+    </task>
+    <task id="LOCAL-00017" summary="interface">
+      <option name="closed" value="true" />
+      <created>1789114806861</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1789114806861</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -225,10 +239,11 @@
     <MESSAGE value=" MAJ" />
     <MESSAGE value=" MAJ2" />
     <MESSAGE value="Trajectoire" />
-    <option name="LAST_COMMIT_MESSAGE" value="Trajectoire" />
+    <MESSAGE value="interface" />
+    <option name="LAST_COMMIT_MESSAGE" value="interface" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/GP211_1_0$main.coverage" NAME="main Coverage Results" MODIFIED="1789114064226" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GP211_1_0$main.coverage" NAME="main Coverage Results" MODIFIED="1789114820534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GP211_1_0$main_window.coverage" NAME="main_window Coverage Results" MODIFIED="1789112410873" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ui" />
   </component>
 </project>
