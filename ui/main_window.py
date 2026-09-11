@@ -10,9 +10,9 @@ from ui.radar_widget import RadarWidget
 
 STYLE_BOUTON = """
 QPushButton {
-    font-size: 15px;
-    padding: 10px;
-    min-height: 40px;
+    font-size: 13px;
+    padding: 6px;
+    min-height: 30px;
 }
 """
 
@@ -44,7 +44,6 @@ class SimulateurATC(QMainWindow):
         main_widget = QWidget()
         layout = QHBoxLayout()
 
-        # --- Panneau gauche ---
         left_panel = QVBoxLayout()
         font_info = QFont()
         font_info.setPointSize(11)
@@ -72,15 +71,13 @@ class SimulateurATC(QMainWindow):
         left_panel.addWidget(lbl_titre_liste)
         left_panel.addWidget(self.list_avions)
 
-        # --- Radar central ---
         self.radar = RadarWidget(self.engine, self._selection_via_radar)
 
-        # --- Panneau droit ---
         right_panel = QVBoxLayout()
         controls_group = QGroupBox("INSTRUCTIONS")
-        controls_group.setMinimumWidth(260)
+        controls_group.setMinimumWidth(230)
         controls_layout = QVBoxLayout()
-        controls_layout.setSpacing(14)
+        controls_layout.setSpacing(10)
 
         self.lbl_cap = QLabel("Cap : --")
         self.lbl_cap.setFont(font_info)
@@ -88,8 +85,12 @@ class SimulateurATC(QMainWindow):
 
         self.cap_slider = QSlider(Qt.Horizontal)
         self.cap_slider.setRange(0, 359)
-        self.cap_slider.setMinimumHeight(35)
+        self.cap_slider.setMinimumHeight(30)
         self.cap_slider.valueChanged.connect(self._cap_slider_change)
+
+        lbl_astuce = QLabel("Flèches ← → : cap  |  ↑ ↓ : altitude")
+        lbl_astuce.setStyleSheet("font-size: 10px; color: gray;")
+        lbl_astuce.setWordWrap(True)
 
         btn_up = QPushButton("⬆ Monter (+500m)")
         btn_up.setStyleSheet(STYLE_BOUTON)
@@ -105,6 +106,7 @@ class SimulateurATC(QMainWindow):
 
         controls_layout.addWidget(self.lbl_cap)
         controls_layout.addWidget(self.cap_slider)
+        controls_layout.addWidget(lbl_astuce)
         controls_layout.addWidget(btn_up)
         controls_layout.addWidget(btn_down)
         controls_layout.addWidget(btn_land)
@@ -118,7 +120,6 @@ class SimulateurATC(QMainWindow):
         main_widget.setLayout(layout)
         self.setCentralWidget(main_widget)
 
-    # --- Sélection ---
     def _selection_via_radar(self, avion):
         self.engine.selectionner(avion)
         self.avion_selectionne = avion
@@ -137,14 +138,18 @@ class SimulateurATC(QMainWindow):
         self.cap_slider.blockSignals(False)
         self.lbl_cap.setText(f"Cap : {int(valeur_cap):03d}°")
 
-    # --- Instructions ---
     def _cap_slider_change(self, valeur):
         self.lbl_cap.setText(f"Cap : {valeur:03d}°")
         if self.avion_selectionne:
             ChangerCap(self.avion_selectionne, valeur).executer()
 
     def _executer(self, classe_instruction):
-        if self.avion_selectionne:
+        if not self.avion_selectionne:
+            return
+        if classe_instruction is Atterrir:
+            piste = self.engine.piste_la_plus_proche(self.avion_selectionne)
+            Atterrir(self.avion_selectionne, piste).executer()
+        else:
             classe_instruction(self.avion_selectionne).executer()
 
     def keyPressEvent(self, event):
@@ -157,9 +162,14 @@ class SimulateurATC(QMainWindow):
                 self.avion_selectionne.ajuster_cap(5)
                 self._synchroniser_slider(self.avion_selectionne.cap)
                 return
+            if event.key() == Qt.Key_Up:
+                self.avion_selectionne.monter(100)
+                return
+            if event.key() == Qt.Key_Down:
+                self.avion_selectionne.descendre(100)
+                return
         super().keyPressEvent(event)
 
-    # --- Boucle ---
     def _boucle_simulation(self):
         self.lbl_heure.setText("Heure : " + QTime.currentTime().toString("HH:mm:ss"))
         self.lbl_vent.setText(f"Vent : {self.engine.vent.direction:03d}° / {self.engine.vent.vitesse} km/h")

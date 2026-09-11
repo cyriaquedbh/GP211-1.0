@@ -14,6 +14,7 @@ class Avion:
         self.fuel = 100.0
         self.selected = False
         self.is_landing = False
+        self.piste_visee = None  # Piste assignée pour l'atterrissage en cours
 
     # --- Instructions ---
     def changer_cap(self, nouveau_cap: int):
@@ -30,19 +31,20 @@ class Avion:
         self.target_altitude = max(0, self.target_altitude - delta)
         self.is_landing = False
 
-    def demander_atterrissage(self):
+    def demander_atterrissage(self, piste):
         self.is_landing = True
+        self.piste_visee = piste
         self.target_altitude = 0
 
     # --- Etat ---
     @property
     def en_alerte(self) -> bool:
-        """Alarme : l'avion descend sous les 500 m."""
         return 0 < self.altitude <= 500
 
-    # --- Pilotage automatique vers la piste (approche façon ILS) ---
-    def _cap_vers_piste(self, piste, centre):
-        cx, cy = centre
+    # --- Pilotage automatique vers la piste visée (approche façon ILS) ---
+    def _cap_vers_piste(self, centre_aeroport):
+        piste = self.piste_visee
+        cx, cy = piste.centre(centre_aeroport)
         cap_rad = math.radians(piste.cap)
         dir_x, dir_y = math.sin(cap_rad), -math.cos(cap_rad)
 
@@ -56,9 +58,12 @@ class Avion:
         correction = max(-45.0, min(45.0, perp * sens * 0.4))
         return (cap_piste - correction) % 360
 
-    def sur_piste(self, piste, centre) -> bool:
-        """True si l'avion est dans le rectangle (longueur x largeur) de la piste."""
-        cx, cy = centre
+    def sur_piste(self, centre_aeroport) -> bool:
+        """True si l'avion est dans le rectangle (longueur x largeur) de la piste visée."""
+        piste = self.piste_visee
+        if piste is None:
+            return False
+        cx, cy = piste.centre(centre_aeroport)
         cap_rad = math.radians(piste.cap)
         dir_x, dir_y = math.sin(cap_rad), -math.cos(cap_rad)
         rel_x, rel_y = self.x - cx, self.y - cy
@@ -66,22 +71,22 @@ class Avion:
         perp = -rel_x * dir_y + rel_y * dir_x
         return abs(proj) <= piste.longueur / 2 and abs(perp) <= piste.largeur / 2
 
-    def a_atterri(self, piste, centre) -> bool:
-        return self.altitude <= 0 and self.sur_piste(piste, centre)
+    def a_atterri(self, centre_aeroport) -> bool:
+        return self.altitude <= 0 and self.sur_piste(centre_aeroport)
 
-    def a_crashe(self, piste, centre) -> bool:
-        return self.altitude <= 0 and not self.sur_piste(piste, centre)
+    def a_crashe(self, centre_aeroport) -> bool:
+        return self.altitude <= 0 and not self.sur_piste(centre_aeroport)
 
     # --- Simulation ---
-    def update(self, dt: float, piste, centre=(300, 300)):
+    def update(self, dt: float, centre: tuple = (300, 300)):
         if self.altitude < self.target_altitude:
             self.altitude += min(20, self.target_altitude - self.altitude)
         elif self.altitude > self.target_altitude:
             self.altitude -= min(20, self.altitude - self.target_altitude)
         self.altitude = max(0, self.altitude)
 
-        if self.is_landing and self.altitude > 0:
-            self.cap = self._cap_vers_piste(piste, centre)
+        if self.is_landing and self.altitude > 0 and self.piste_visee is not None:
+            self.cap = self._cap_vers_piste(centre)
 
         rad = math.radians(self.cap)
         self.x += math.sin(rad) * (self.vitesse / 100) * dt

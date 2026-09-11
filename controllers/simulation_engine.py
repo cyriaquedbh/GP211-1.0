@@ -13,7 +13,6 @@ class SimulationEngine:
         self.score = 0
         self.atterrissages_reussis = 0
         self.crashes = 0
-        self.piste_active = aeroport.piste_principale()
         self.vent = Vent()
         self.temps_ecoule = 0.0
         self.prochain_spawn = random.uniform(5, 10)
@@ -25,23 +24,31 @@ class SimulationEngine:
     def centre(self):
         return (self.zone_taille // 2, self.zone_taille // 2)
 
+    def piste_la_plus_proche(self, avion):
+        """Utilisée pour assigner automatiquement une piste quand on ordonne 'Atterrir'."""
+        centre = self.centre()
+        return min(
+            self.aeroport.pistes,
+            key=lambda p: math.hypot(avion.x - p.centre(centre)[0], avion.y - p.centre(centre)[1]),
+        )
+
     def maj(self, dt: float) -> bool:
         self.temps_ecoule += dt
         self.vent.rafraichir()
         self._faire_apparaitre_avions(dt)
 
+        centre = self.centre()
         avions_restants = []
         for avion in self.avions:
-            avion.update(dt, self.piste_active, centre=self.centre())
+            avion.update(dt, centre=centre)
 
-            if avion.a_atterri(self.piste_active, self.centre()):
+            if avion.a_atterri(centre):
                 self.score += 100
                 self.atterrissages_reussis += 1
                 self.dernier_evenement = f"{avion.name} a atterri avec succès !"
-                self.piste_active = random.choice(self.aeroport.pistes)
                 continue
 
-            if avion.a_crashe(self.piste_active, self.centre()):
+            if avion.a_crashe(centre):
                 self.score = max(0, self.score - 150)
                 self.crashes += 1
                 self.dernier_evenement = f"{avion.name} s'est crashé !"

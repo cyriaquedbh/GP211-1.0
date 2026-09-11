@@ -41,5 +41,9 @@ class Descendre(Instruction):
 
 
 class Atterrir(Instruction):
+    def __init__(self, avion, piste):
+        super().__init__(avion)
+        self.piste = piste
+
     def executer(self):
-        self.avion.demander_atterrissage()
+        self.avion.demander_atterrissage(self.piste)
