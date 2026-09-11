@@ -1,10 +1,11 @@
 import math
-from PySide6.QtCore import Qt, QPointF
-from PySide6.QtGui import QPainterPath, QPen, QColor
+
+from PySide6.QtCore import QPointF, Qt
+from PySide6.QtGui import QColor, QPainterPath, QPen
 
 
 def piste_la_plus_proche(avion, pistes, centre):
-    """Retourne, parmi une liste de pistes, celle dont l'axe est le plus proche de l'avion."""
+    """Retourne la piste la plus proche de l'appareil sélectionné."""
     meilleure, meilleure_dist = None, float("inf")
     for piste in pistes:
         cx, cy = piste.centre(centre)
@@ -15,10 +16,7 @@ def piste_la_plus_proche(avion, pistes, centre):
 
 
 def dessiner_trajectoire(painter, avion, piste, centre):
-    """
-    Dessine, en pâle et transparent, le chemin que l'avion sélectionné doit
-    suivre pour rejoindre l'axe de la piste puis se poser sur toute sa longueur.
-    """
+    """Dessine la trajectoire prédictive d'approche et d'alignement ILS."""
     if piste is None:
         return
 
@@ -28,32 +26,59 @@ def dessiner_trajectoire(painter, avion, piste, centre):
 
     rel_x, rel_y = avion.x - cx, avion.y - cy
     proj = rel_x * dir_x + rel_y * dir_y
-    sens = 1 if proj < 0 else -1  # côté d'où arrive l'avion
+    sens = 1 if proj < 0 else -1
 
     demi_longueur = piste.longueur / 2
-    seuil = QPointF(cx - sens * dir_x * demi_longueur, cy - sens * dir_y * demi_longueur)
-    fin_piste = QPointF(cx + sens * dir_x * demi_longueur, cy + sens * dir_y * demi_longueur)
-    point_interception = QPointF(
-        cx - sens * dir_x * (demi_longueur + 60),
-        cy - sens * dir_y * (demi_longueur + 60),
+    seuil = QPointF(
+        cx - sens * dir_x * demi_longueur,
+        cy - sens * dir_y * demi_longueur,
+    )
+    fin_piste = QPointF(
+        cx + sens * dir_x * demi_longueur,
+        cy + sens * dir_y * demi_longueur,
     )
 
-    # Surbrillance pâle de toute la piste (atterrissage possible sur toute sa longueur)
+    # Point de capture de l'axe de descente (Glide Path)
+    point_interception = QPointF(
+        cx - sens * dir_x * (demi_longueur + 80),
+        cy - sens * dir_y * (demi_longueur + 80),
+    )
+
     painter.save()
+
+    # 1. Surbrillance néon de la piste visée
     painter.translate(cx, cy)
     painter.rotate(piste.cap)
-    painter.setPen(Qt.NoPen)
-    painter.setBrush(QColor(255, 255, 255, 25))
-    painter.drawRect(int(-piste.largeur / 2), int(-piste.longueur / 2), piste.largeur, piste.longueur)
+    painter.setPen(QPen(QColor(56, 189, 248, 120), 1.5))
+    painter.setBrush(QColor(56, 189, 248, 25))
+    painter.drawRoundedRect(
+        -piste.largeur / 2,
+        -piste.longueur / 2,
+        piste.largeur,
+        piste.longueur,
+        2,
+        2,
+    )
     painter.restore()
 
-    # Trajectoire pâle et transparente : avion -> seuil -> bout de piste
+    # 2. Vecteur d'approche ILS (Courbe de Bézier)
     chemin = QPainterPath(QPointF(avion.x, avion.y))
     chemin.quadTo(point_interception, seuil)
     chemin.lineTo(fin_piste)
 
+    # Ombre de contraste pour le tracé
     painter.save()
-    painter.setPen(QPen(QColor(255, 255, 255, 130), 2, Qt.DashLine))
+    painter.setPen(QPen(QColor(4, 8, 14, 220), 4, Qt.SolidLine))
     painter.setBrush(Qt.NoBrush)
     painter.drawPath(chemin)
+
+    # Ligne d'approche pointillée Cyan/Cyan Néon
+    painter.setPen(QPen(QColor(56, 189, 248, 200), 2, Qt.DashLine))
+    painter.drawPath(chemin)
+
+    # Balise visuelle sur le seuil de piste (Touchdown Zone)
+    painter.setPen(Qt.NoPen)
+    painter.setBrush(QColor(251, 191, 36, 220))
+    painter.drawEllipse(seuil, 4, 4)
+
     painter.restore()
