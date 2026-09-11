@@ -3,8 +3,10 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Piste:
-    nom: str   # ex: "09L/27R"
-    cap: int   # cap magnétique d'atterrissage en degrés
+    nom: str
+    cap: int
+    longueur: int = 300   # "longueur jouable" sur le radar (abstraction du monde réel)
+    largeur: int = 40     # "largeur jouable"
 
     def cap_oppose(self):
         return (self.cap + 180) % 360
