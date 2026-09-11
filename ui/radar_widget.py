@@ -23,7 +23,6 @@ class RadarWidget(QWidget):
         self._dessiner_avions(painter)
 
     def _dessiner_decor(self, painter):
-        """Anneaux de distance + rose des caps, pour un rendu 'vrai scope radar'."""
         cx, cy = self.engine.centre()
         painter.save()
         painter.translate(cx, cy)
@@ -96,18 +95,36 @@ class RadarWidget(QWidget):
         painter.drawText(int(origine.x()) - 35, int(origine.y()) + 35,
                           f"Vent {vent.direction:03d}°/{vent.vitesse}km/h")
 
+    @staticmethod
+    def _silhouette_avion() -> QPolygonF:
+        """Silhouette vue de dessus : fuselage + ailes + empennage (le nez pointe vers +x)."""
+        return QPolygonF([
+            QPointF(16, 0),     # nez
+            QPointF(4, -3),
+            QPointF(2, -14),    # bout aile droite
+            QPointF(-2, -5),
+            QPointF(-8, -3),
+            QPointF(-16, -7),   # bout empennage droit
+            QPointF(-12, 0),
+            QPointF(-16, 7),    # bout empennage gauche
+            QPointF(-8, 3),
+            QPointF(-2, 5),
+            QPointF(2, 14),     # bout aile gauche
+            QPointF(4, 3),
+        ])
+
     def _dessiner_avions(self, painter):
         clignote_visible = (self._compteur_clignotement // 5) % 2 == 0
         for avion in self.engine.avions:
             if avion.en_alerte and clignote_visible:
                 painter.setPen(Qt.NoPen)
                 painter.setBrush(QColor(255, 0, 0, 90))
-                painter.drawEllipse(QPointF(avion.x, avion.y), 18, 18)
+                painter.drawEllipse(QPointF(avion.x, avion.y), 20, 20)
 
             painter.save()
             painter.translate(avion.x, avion.y)
             painter.rotate(avion.cap - 90)
-            poly = QPolygonF([QPointF(12, 0), QPointF(-8, -10), QPointF(-4, 0), QPointF(-8, 10)])
+
             if avion.en_alerte:
                 couleur = QColor(255, 0, 0)
             elif avion.selected:
@@ -116,7 +133,7 @@ class RadarWidget(QWidget):
                 couleur = QColor(50, 255, 255)
             painter.setBrush(QBrush(couleur))
             painter.setPen(QPen(QColor(255, 255, 255), 1))
-            painter.drawPolygon(poly)
+            painter.drawPolygon(self._silhouette_avion())
             painter.restore()
 
             painter.setPen(QColor(255, 255, 255))

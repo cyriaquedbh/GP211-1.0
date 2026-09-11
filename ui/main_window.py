@@ -1,11 +1,29 @@
 from PySide6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-                                QLabel, QPushButton, QListWidget, QSpinBox, QGroupBox)
+                                QLabel, QPushButton, QListWidget, QSlider, QGroupBox)
 from PySide6.QtCore import QTimer, Qt, QTime
-from PySide6.QtGui import QColor
+from PySide6.QtGui import QColor, QFont
 
 from controllers.simulation_engine import SimulationEngine
 from controllers.instructions import ChangerCap, Monter, Descendre, Atterrir
 from ui.radar_widget import RadarWidget
+
+
+STYLE_BOUTON = """
+QPushButton {
+    font-size: 15px;
+    padding: 10px;
+    min-height: 40px;
+}
+"""
+
+STYLE_LISTE = """
+QListWidget {
+    font-size: 14px;
+}
+QListWidget::item {
+    padding: 6px;
+}
+"""
 
 
 class SimulateurATC(QMainWindow):
@@ -16,7 +34,7 @@ class SimulateurATC(QMainWindow):
         self.avion_selectionne = None
 
         self._init_ui()
-        self.setFocusPolicy(Qt.StrongFocus)  # nécessaire pour capter les flèches du clavier
+        self.setFocusPolicy(Qt.StrongFocus)
 
         self.timer = QTimer()
         self.timer.timeout.connect(self._boucle_simulation)
@@ -26,57 +44,85 @@ class SimulateurATC(QMainWindow):
         main_widget = QWidget()
         layout = QHBoxLayout()
 
+        # --- Panneau gauche ---
         left_panel = QVBoxLayout()
+        font_info = QFont()
+        font_info.setPointSize(11)
+        font_info.setBold(True)
+
         self.lbl_heure = QLabel()
-        self.lbl_heure.setStyleSheet("font-weight: bold;")
+        self.lbl_heure.setFont(font_info)
         self.lbl_stats = QLabel(f"Score: {self.engine.score}")
+        self.lbl_stats.setFont(font_info)
         self.lbl_vent = QLabel()
+        self.lbl_vent.setFont(font_info)
+
+        lbl_titre_liste = QLabel("AVIONS EN VOL :")
+        lbl_titre_liste.setFont(font_info)
+
         self.list_avions = QListWidget()
+        self.list_avions.setMinimumWidth(280)
+        self.list_avions.setMinimumHeight(500)
+        self.list_avions.setStyleSheet(STYLE_LISTE)
         self.list_avions.itemClicked.connect(self._selection_via_liste)
+
         left_panel.addWidget(self.lbl_heure)
         left_panel.addWidget(self.lbl_stats)
         left_panel.addWidget(self.lbl_vent)
-        left_panel.addWidget(QLabel("AVIONS EN VOL:"))
+        left_panel.addWidget(lbl_titre_liste)
         left_panel.addWidget(self.list_avions)
 
+        # --- Radar central ---
         self.radar = RadarWidget(self.engine, self._selection_via_radar)
 
+        # --- Panneau droit ---
         right_panel = QVBoxLayout()
         controls_group = QGroupBox("INSTRUCTIONS")
+        controls_group.setMinimumWidth(260)
         controls_layout = QVBoxLayout()
+        controls_layout.setSpacing(14)
 
-        self.cap_spin = QSpinBox()
-        self.cap_spin.setRange(0, 359)
-        self.cap_spin.setPrefix("Cap: ")
+        self.lbl_cap = QLabel("Cap : --")
+        self.lbl_cap.setFont(font_info)
+        self.lbl_cap.setAlignment(Qt.AlignCenter)
 
-        lbl_astuce = QLabel("Astuce : flèches ← → pour ajuster le cap rapidement")
-        lbl_astuce.setStyleSheet("font-size: 10px; color: gray;")
+        self.cap_slider = QSlider(Qt.Horizontal)
+        self.cap_slider.setRange(0, 359)
+        self.cap_slider.setMinimumHeight(35)
+        self.cap_slider.valueChanged.connect(self._cap_slider_change)
 
-        btn_apply = QPushButton("Changer de cap")
-        btn_apply.clicked.connect(self._changer_cap)
-        btn_up = QPushButton("Monter (+500m)")
+        btn_up = QPushButton("⬆ Monter (+500m)")
+        btn_up.setStyleSheet(STYLE_BOUTON)
         btn_up.clicked.connect(lambda: self._executer(Monter))
-        btn_down = QPushButton("Descendre (-500m)")
+
+        btn_down = QPushButton("⬇ Descendre (-500m)")
+        btn_down.setStyleSheet(STYLE_BOUTON)
         btn_down.clicked.connect(lambda: self._executer(Descendre))
-        btn_land = QPushButton("Atterrir")
+
+        btn_land = QPushButton("🛬 Atterrir")
+        btn_land.setStyleSheet(STYLE_BOUTON)
         btn_land.clicked.connect(lambda: self._executer(Atterrir))
 
-        for w in (self.cap_spin, lbl_astuce, btn_apply, btn_up, btn_down, btn_land):
-            controls_layout.addWidget(w)
+        controls_layout.addWidget(self.lbl_cap)
+        controls_layout.addWidget(self.cap_slider)
+        controls_layout.addWidget(btn_up)
+        controls_layout.addWidget(btn_down)
+        controls_layout.addWidget(btn_land)
         controls_group.setLayout(controls_layout)
         right_panel.addWidget(controls_group)
         right_panel.addStretch()
 
-        layout.addLayout(left_panel, 1)
-        layout.addWidget(self.radar, 3)
-        layout.addLayout(right_panel, 1)
+        layout.addLayout(left_panel, 2)
+        layout.addWidget(self.radar, 4)
+        layout.addLayout(right_panel, 2)
         main_widget.setLayout(layout)
         self.setCentralWidget(main_widget)
 
+    # --- Sélection ---
     def _selection_via_radar(self, avion):
         self.engine.selectionner(avion)
         self.avion_selectionne = avion
-        self.cap_spin.setValue(int(avion.cap))
+        self._synchroniser_slider(avion.cap)
 
     def _selection_via_liste(self, item):
         name = item.text().split(" ")[0]
@@ -85,27 +131,35 @@ class SimulateurATC(QMainWindow):
                 self._selection_via_radar(a)
                 break
 
-    def _changer_cap(self):
+    def _synchroniser_slider(self, valeur_cap):
+        self.cap_slider.blockSignals(True)
+        self.cap_slider.setValue(int(valeur_cap))
+        self.cap_slider.blockSignals(False)
+        self.lbl_cap.setText(f"Cap : {int(valeur_cap):03d}°")
+
+    # --- Instructions ---
+    def _cap_slider_change(self, valeur):
+        self.lbl_cap.setText(f"Cap : {valeur:03d}°")
         if self.avion_selectionne:
-            ChangerCap(self.avion_selectionne, self.cap_spin.value()).executer()
+            ChangerCap(self.avion_selectionne, valeur).executer()
 
     def _executer(self, classe_instruction):
         if self.avion_selectionne:
             classe_instruction(self.avion_selectionne).executer()
 
     def keyPressEvent(self, event):
-        """Flèches ← → : ajustement rapide du cap sans passer par le bouton."""
         if self.avion_selectionne:
             if event.key() == Qt.Key_Left:
                 self.avion_selectionne.ajuster_cap(-5)
-                self.cap_spin.setValue(int(self.avion_selectionne.cap))
+                self._synchroniser_slider(self.avion_selectionne.cap)
                 return
             if event.key() == Qt.Key_Right:
                 self.avion_selectionne.ajuster_cap(5)
-                self.cap_spin.setValue(int(self.avion_selectionne.cap))
+                self._synchroniser_slider(self.avion_selectionne.cap)
                 return
         super().keyPressEvent(event)
 
+    # --- Boucle ---
     def _boucle_simulation(self):
         self.lbl_heure.setText("Heure : " + QTime.currentTime().toString("HH:mm:ss"))
         self.lbl_vent.setText(f"Vent : {self.engine.vent.direction:03d}° / {self.engine.vent.vitesse} km/h")
@@ -118,7 +172,7 @@ class SimulateurATC(QMainWindow):
         self.list_avions.clear()
         for a in self.engine.avions:
             self.list_avions.addItem(
-                f"{a.name} - Alt: {int(a.altitude)}m - V: {a.vitesse}km/h - Fuel: {int(a.fuel)}%")
+                f"{a.name}  |  Alt: {int(a.altitude)}m  |  V: {a.vitesse}km/h  |  Fuel: {int(a.fuel)}%")
             if a.selected:
                 self.list_avions.item(self.list_avions.count() - 1).setBackground(QColor(70, 70, 100))
             elif a.en_alerte:
