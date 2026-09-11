@@ -20,8 +20,6 @@ class Instruction(ABC):
 
 
 class ChangerCap(Instruction):
-    """Ordre de modification de cap magnétique (0° à 359°)."""
-
     def __init__(self, avion, nouveau_cap: int):
         super().__init__(avion)
         self.nouveau_cap = int(nouveau_cap) % 360
@@ -34,8 +32,6 @@ class ChangerCap(Instruction):
 
 
 class Monter(Instruction):
-    """Ordre de changement d'altitude positif."""
-
     def __init__(self, avion, delta: int = 500):
         super().__init__(avion)
         self.delta = delta
@@ -48,8 +44,6 @@ class Monter(Instruction):
 
 
 class Descendre(Instruction):
-    """Ordre de changement d'altitude négatif."""
-
     def __init__(self, avion, delta: int = 500):
         super().__init__(avion)
         self.delta = delta
@@ -62,8 +56,6 @@ class Descendre(Instruction):
 
 
 class Atterrir(Instruction):
-    """Ordre d'alignement et d'approche finale sur piste."""
-
     def __init__(self, avion, piste):
         super().__init__(avion)
         self.piste = piste
@@ -75,3 +67,13 @@ class Atterrir(Instruction):
     def __str__(self) -> str:
         nom_piste = self.piste.nom if self.piste else "INCONNUE"
         return f"[{self.avion.name}] APPROCHE PISTE {nom_piste}"
+
+
+class Attendre(Instruction):
+    """Ordre de mise en circuit d'attente (Holding Pattern)."""
+
+    def executer(self) -> None:
+        self.avion.effectuer_attente()
+
+    def __str__(self) -> str:
+        return f"[{self.avion.name}] CIRCUIT D'ATTENTE"

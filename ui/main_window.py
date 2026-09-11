@@ -7,7 +7,7 @@ from PySide6.QtCore import QTimer, Qt, QTime
 from PySide6.QtGui import QColor, QFont
 
 from controllers.simulation_engine import SimulationEngine
-from controllers.instructions import ChangerCap, Monter, Descendre, Atterrir
+from controllers.instructions import ChangerCap, Monter, Descendre, Atterrir, Attendre
 from ui.radar_widget import RadarWidget
 from ui.cockpit_widget import CockpitWidget
 
@@ -150,6 +150,18 @@ QPushButton#btnAtterrir:hover {
     color: #ffffff;
 }
 
+QPushButton#btnAttente {
+    background-color: #431407;
+    border: 1px solid #ea580c;
+    color: #ffedd5;
+}
+
+QPushButton#btnAttente:hover {
+    background-color: #7c2d12;
+    border-color: #f97316;
+    color: #ffffff;
+}
+
 QPushButton#btnCockpit {
     background-color: #1e1b4b;
     border: 1px solid #6366f1;
@@ -283,6 +295,10 @@ class SimulateurATC(QMainWindow):
         btn_land.setObjectName("btnAtterrir")
         btn_land.clicked.connect(lambda: self._executer(Atterrir))
 
+        btn_hold = QPushButton("🔄   ATTENTE (CIRCUIT 360°)")
+        btn_hold.setObjectName("btnAttente")
+        btn_hold.clicked.connect(lambda: self._executer(Attendre))
+
         btn_cockpit = QPushButton("👁   VUE COCKPIT")
         btn_cockpit.setObjectName("btnCockpit")
         btn_cockpit.clicked.connect(self._ouvrir_vue_cockpit)
@@ -298,6 +314,7 @@ class SimulateurATC(QMainWindow):
         controls_layout.addWidget(btn_down)
         controls_layout.addSpacing(6)
         controls_layout.addWidget(btn_land)
+        controls_layout.addWidget(btn_hold)
         controls_layout.addWidget(btn_cockpit)
 
         controls_group.setLayout(controls_layout)
@@ -330,7 +347,8 @@ class SimulateurATC(QMainWindow):
             return
 
         avion = self.avion_selectionne
-        self.lbl_avion.setText(f"✈ {avion.name}\nALTITUDE: {int(avion.altitude)} m")
+        statut = " [HOLDING]" if avion.is_holding else ""
+        self.lbl_avion.setText(f"✈ {avion.name}{statut}\nALTITUDE: {int(avion.altitude)} m")
         self.lbl_avion.setStyleSheet("background-color: #0c4a6e; border: 1px solid #38bdf8; border-radius: 6px; padding: 10px; color: #f0f9ff; font-size: 12px; font-weight: 800;")
 
     def _synchroniser_slider(self, valeur_cap):
@@ -351,6 +369,8 @@ class SimulateurATC(QMainWindow):
         if classe_instruction is Atterrir:
             piste = self.engine.piste_la_plus_proche(self.avion_selectionne)
             Atterrir(self.avion_selectionne, piste).executer()
+        elif classe_instruction is Attendre:
+            Attendre(self.avion_selectionne).executer()
         elif classe_instruction in (Monter, Descendre):
             classe_instruction(self.avion_selectionne, delta=100).executer()
         else:
@@ -359,7 +379,7 @@ class SimulateurATC(QMainWindow):
     def _ouvrir_vue_cockpit(self):
         if self.avion_selectionne:
             self.cockpit_dialog = CockpitWidget(
-                self.avion_selectionne, self.engine.aeroport, self
+                self.avion_selectionne, self.engine, self
             )
             self.cockpit_dialog.show()
 

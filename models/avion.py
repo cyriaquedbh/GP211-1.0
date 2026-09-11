@@ -25,7 +25,6 @@ class Avion:
     def __init__(self, name: str, zone_taille: int = 600):
         self.name = name
 
-        # Position initiale générée autour de l'origine (0, 0)
         rayon_max = zone_taille // 2 - 50
         self.x = random.uniform(-rayon_max, rayon_max)
         self.y = random.uniform(-rayon_max, rayon_max)
@@ -42,11 +41,14 @@ class Avion:
         self.selected = False
         self._en_alerte = False
 
+        # Navigation & Approche
         self.is_landing = False
+        self.is_holding = False
         self.piste_visee = None
 
     def changer_cap(self, nouveau_cap: int):
         self.target_cap = float(nouveau_cap % 360)
+        self.is_holding = False
 
     def ajuster_cap(self, delta: int):
         self.changer_cap(self.target_cap + delta)
@@ -56,6 +58,7 @@ class Avion:
             return
         self.target_altitude += delta
         self.is_landing = False
+        self.is_holding = False
         self.piste_visee = None
 
     def descendre(self, delta: int = 500):
@@ -63,14 +66,21 @@ class Avion:
             return
         self.target_altitude = max(self.ALTITUDE_MIN, self.target_altitude - delta)
         self.is_landing = False
+        self.is_holding = False
         self.piste_visee = None
 
     def demander_atterrissage(self, piste):
         if piste is None:
             return
         self.is_landing = True
+        self.is_holding = False
         self.piste_visee = piste
         self.target_altitude = self.ALTITUDE_MIN
+
+    def effectuer_attente(self):
+        """Active le circuit d'attente (Holding Pattern à 360°)."""
+        self.is_holding = True
+        self.is_landing = False
 
     @property
     def en_alerte(self) -> bool:
@@ -136,11 +146,28 @@ class Avion:
         projection, ecart_lateral = self._position_relative_piste(centre_aeroport)
         return (abs(projection) <= piste.longueur / 2) and (abs(ecart_lateral) <= piste.largeur / 2)
 
+    def est_aligne_piste(self) -> bool:
+        """Vérifie que l'écart de cap avec la piste reste acceptable (< 15°)."""
+        if self.piste_visee is None:
+            return False
+        diff1 = abs((self.cap - self.piste_visee.cap + 540) % 360 - 180)
+        diff2 = abs((self.cap - self.piste_visee.cap_oppose() + 540) % 360 - 180)
+        return min(diff1, diff2) <= 15.0
+
     def a_atterri(self, centre_aeroport) -> bool:
-        return self.altitude <= self.ALTITUDE_MIN and self.sur_piste(centre_aeroport)
+        """L'atterrissage n'est validé que si l'avion touche le sol SUR la piste ET correctement aligné."""
+        return (
+            self.altitude <= self.ALTITUDE_MIN
+            and self.sur_piste(centre_aeroport)
+            and self.est_aligne_piste()
+        )
 
     def a_crashe(self, centre_aeroport) -> bool:
-        return self.altitude <= self.ALTITUDE_MIN and not self.sur_piste(centre_aeroport)
+        """Crash si le sol est touché hors piste OU si l'approche est désaxée."""
+        sol_touche = self.altitude <= self.ALTITUDE_MIN
+        if not sol_touche:
+            return False
+        return not self.sur_piste(centre_aeroport) or not self.est_aligne_piste()
 
     def _mettre_a_jour_altitude(self):
         difference = self.target_altitude - self.altitude
@@ -151,6 +178,10 @@ class Avion:
         self.altitude = max(self.ALTITUDE_MIN, self.altitude)
 
     def _mettre_a_jour_cap(self):
+        if self.is_holding:
+            # Effectue un virage à 360° continu
+            self.target_cap = (self.target_cap + self.TAUX_VIRAGE) % 360
+
         diff = (self.target_cap - self.cap + 540) % 360 - 180
         if abs(diff) <= self.TAUX_VIRAGE:
             self.cap = self.target_cap
