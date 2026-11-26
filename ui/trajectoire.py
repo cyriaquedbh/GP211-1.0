@@ -1,32 +1,21 @@
-import math
-
 from PySide6.QtCore import QPointF, Qt
 from PySide6.QtGui import QColor, QPainterPath, QPen
 
 
-def piste_la_plus_proche(avion, pistes, centre):
-    """Retourne la piste la plus proche de l'appareil sélectionné."""
-    meilleure, meilleure_dist = None, float("inf")
-    for piste in pistes:
-        cx, cy = piste.centre(centre)
-        dist = math.hypot(avion.x - cx, avion.y - cy)
-        if dist < meilleure_dist:
-            meilleure, meilleure_dist = piste, dist
-    return meilleure
-
-
-def dessiner_trajectoire(painter, avion, piste, centre):
+def dessiner_trajectoire(painter, avion, piste, centre) -> None:
     """Dessine la trajectoire prédictive d'approche et d'alignement ILS."""
     if piste is None:
         return
 
     cx, cy = piste.centre(centre)
-    cap_rad = math.radians(piste.cap)
-    dir_x, dir_y = math.sin(cap_rad), -math.cos(cap_rad)
+    dir_x, dir_y = piste.direction()
 
-    rel_x, rel_y = avion.x - cx, avion.y - cy
-    proj = rel_x * dir_x + rel_y * dir_y
-    sens = 1 if proj < 0 else -1
+    # Sens figé si l'avion est déjà autorisé sur cette piste, sinon déduit de sa position.
+    if avion.is_landing and avion.piste_visee is piste:
+        sens = avion.sens_approche
+    else:
+        projection, _ = piste.position_relative(avion.x, avion.y, centre)
+        sens = piste.sens_approche(projection)
 
     demi_longueur = piste.longueur / 2
     seuil = QPointF(
@@ -61,7 +50,7 @@ def dessiner_trajectoire(painter, avion, piste, centre):
     )
     painter.restore()
 
-    # 2. Vecteur d'approche ILS (Courbe de Bézier)
+    # 2. Vecteur d'approche ILS (courbe de Bézier)
     chemin = QPainterPath(QPointF(avion.x, avion.y))
     chemin.quadTo(point_interception, seuil)
     chemin.lineTo(fin_piste)
@@ -72,11 +61,11 @@ def dessiner_trajectoire(painter, avion, piste, centre):
     painter.setBrush(Qt.NoBrush)
     painter.drawPath(chemin)
 
-    # Ligne d'approche pointillée Cyan/Cyan Néon
+    # Ligne d'approche pointillée cyan
     painter.setPen(QPen(QColor(56, 189, 248, 200), 2, Qt.DashLine))
     painter.drawPath(chemin)
 
-    # Balise visuelle sur le seuil de piste (Touchdown Zone)
+    # Balise visuelle sur le seuil de piste (zone de toucher)
     painter.setPen(Qt.NoPen)
     painter.setBrush(QColor(251, 191, 36, 220))
     painter.drawEllipse(seuil, 4, 4)
