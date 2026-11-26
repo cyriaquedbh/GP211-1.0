@@ -1,10 +1,13 @@
+import math
 import random
 
 
 class Vent:
-    """Modèle de vent aéronautique (direction d'origine et vitesse)."""
+    """Modèle de vent aéronautique : direction d'ORIGINE (°) et vitesse (km/h)."""
 
-    def __init__(self):
+    VITESSE_MAX = 60
+
+    def __init__(self) -> None:
         self.direction = random.randint(0, 359)
         self.vitesse = random.randint(5, 25)
 
@@ -15,12 +18,11 @@ class Vent:
             self.direction = (self.direction + delta_direction) % 360
 
             delta_vitesse = random.randint(-2, 2)
-            self.vitesse = max(0, min(60, self.vitesse + delta_vitesse))
+            self.vitesse = max(0, min(self.VITESSE_MAX, self.vitesse + delta_vitesse))
 
-    @property
-    def vitesse_noeuds(self) -> int:
-        """Retourne la vitesse convertie en nœuds (kts)."""
-        return int(self.vitesse / 1.852)
+    def composante_face(self, cap: float) -> float:
+        """Vent de face (> 0) ou arrière (< 0), en km/h, pour un avion roulant au cap donné."""
+        return self.vitesse * math.cos(math.radians(cap - self.direction))
 
     def __str__(self) -> str:
         return f"{self.direction:03d}° / {self.vitesse} km/h"

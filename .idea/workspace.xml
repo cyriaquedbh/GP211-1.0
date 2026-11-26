@@ -1,71 +1,62 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="AutoImportSettings">
-    <option name="autoReloadType" value="ALL" />
+    <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="8167cf2d-2c8d-4fa7-8b6a-47e979f74ebd" name="Changes" comment="MISE A JOUR TOTAL" />
+    <list default="true" id="bd3264a6-9050-4668-bc05-dfa274801ac7" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="FileTemplateManagerImpl">
-    <option name="RECENT_TEMPLATES">
-      <list>
-        <option value="Python Script" />
-      </list>
-    </option>
-  </component>
-  <component name="Git.Settings">
-    <option name="RECENT_BRANCH_BY_REPOSITORY">
-      <map>
-        <entry key="$PROJECT_DIR$" value="feature/radar" />
-      </map>
-    </option>
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
-  </component>
-  <component name="GitHubPullRequestSearchHistory">{
-  &quot;lastFilter&quot;: {
-    &quot;state&quot;: &quot;OPEN&quot;,
-    &quot;assignee&quot;: &quot;cyriaquedbh&quot;
-  }
-}</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/cyriaquedbh/GP211-1.0.git&quot;,
-    &quot;accountId&quot;: &quot;3bc9ef9b-218b-4f17-a2a1-cb3783427cab&quot;
-  }
-}</component>
   <component name="ProjectColorInfo">{
-  &quot;associatedIndex&quot;: 8,
+  &quot;associatedIndex&quot;: 7,
   &quot;fromUser&quot;: false
 }</component>
-  <component name="ProjectId" id="3ImAfhbeJw7VBa65RmCUl6nhu16" />
-  <component name="ProjectLevelVcsManager">
-    <ConfirmationsSetting value="1" id="Add" />
-  </component>
+  <component name="ProjectId" id="3L5NgaEcUL04X2DgVypxC5OkCCe" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.avion.executor": "Run",
-    "Python.main.executor": "Run",
-    "Python.main_window.executor": "Run",
-    "Python.radar_widget.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "RunOnceActivity.typescript.service.memoryLimit.init": "true",
-    "codeWithMe.voiceChat.enabledByDefault": "false",
-    "git-widget-placeholder": "feature/instructions",
-    "node.js.detected.package.jshint": "true",
-    "node.js.selected.package.jshint": "",
-    "nodejs_package_manager_path": "npm"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/cydub/Desktop/OneDrive - IPSA/IPSA - 2 EME ANNEE/1ER SEMESTRE/AERONAUTIQUE ET SPATIAL/(GP211) GRAND PROJET PROGRAMMATION/atc_corrige&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;
   }
-}]]></component>
+}</component>
+  <component name="RunManager">
+    <configuration name="main" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
+      <module name="atc_corrige" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="~\Desktop\OneDrive - IPSA\IPSA - 2 EME ANNEE\1ER SEMESTRE\AERONAUTIQUE ET SPATIAL\(GP211) GRAND PROJET PROGRAMMATION\atc_corrige\.venv" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="DEBUG_JUST_MY_CODE" value="false" />
+      <option name="RUN_TOOL" value="" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/main.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -75,221 +66,15 @@
   </component>
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="8167cf2d-2c8d-4fa7-8b6a-47e979f74ebd" name="Changes" comment="" />
-      <created>1788359474649</created>
+      <changelist id="bd3264a6-9050-4668-bc05-dfa274801ac7" name="Changes" comment="" />
+      <created>1792740080727</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1788359474649</updated>
-      <workItem from="1788359475642" duration="580000" />
-      <workItem from="1788425188335" duration="25000" />
-      <workItem from="1788425231705" duration="293000" />
-      <workItem from="1789109621869" duration="8780000" />
+      <updated>1792740080727</updated>
     </task>
-    <task id="LOCAL-00001" summary="INITIALISATION">
-      <option name="closed" value="true" />
-      <created>1788359605505</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1788359605505</updated>
-    </task>
-    <task id="LOCAL-00002" summary="INITIALISATION">
-      <option name="closed" value="true" />
-      <created>1788359618528</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1788359618528</updated>
-    </task>
-    <task id="LOCAL-00003" summary="INITIALISATION">
-      <option name="closed" value="true" />
-      <created>1788359708372</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1788359708372</updated>
-    </task>
-    <task id="LOCAL-00004" summary="INITIALISATION">
-      <option name="closed" value="true" />
-      <created>1788359741828</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1788359741828</updated>
-    </task>
-    <task id="LOCAL-00005" summary="INITIALISATION">
-      <option name="closed" value="true" />
-      <created>1788360419207</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1788360419207</updated>
-    </task>
-    <task id="LOCAL-00006" summary="Main">
-      <option name="closed" value="true" />
-      <created>1788360941728</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1788360941728</updated>
-    </task>
-    <task id="LOCAL-00007" summary="Main">
-      <option name="closed" value="true" />
-      <created>1788361161043</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1788361161043</updated>
-    </task>
-    <task id="LOCAL-00008" summary="Main">
-      <option name="closed" value="true" />
-      <created>1788362586014</created>
-      <option name="number" value="00008" />
-      <option name="presentableId" value="LOCAL-00008" />
-      <option name="project" value="LOCAL" />
-      <updated>1788362586014</updated>
-    </task>
-    <task id="LOCAL-00009" summary="Main">
-      <option name="closed" value="true" />
-      <created>1788362621574</created>
-      <option name="number" value="00009" />
-      <option name="presentableId" value="LOCAL-00009" />
-      <option name="project" value="LOCAL" />
-      <updated>1788362621574</updated>
-    </task>
-    <task id="LOCAL-00010" summary="Nouvelles modifications :&#10;&#10;Belle piste&#10;Cap cohérent">
-      <option name="closed" value="true" />
-      <created>1789109950428</created>
-      <option name="number" value="00010" />
-      <option name="presentableId" value="LOCAL-00010" />
-      <option name="project" value="LOCAL" />
-      <updated>1789109950428</updated>
-    </task>
-    <task id="LOCAL-00011" summary="Test neuf">
-      <option name="closed" value="true" />
-      <created>1789111826530</created>
-      <option name="number" value="00011" />
-      <option name="presentableId" value="LOCAL-00011" />
-      <option name="project" value="LOCAL" />
-      <updated>1789111826530</updated>
-    </task>
-    <task id="LOCAL-00012" summary=" MAJ">
-      <option name="closed" value="true" />
-      <created>1789112434315</created>
-      <option name="number" value="00012" />
-      <option name="presentableId" value="LOCAL-00012" />
-      <option name="project" value="LOCAL" />
-      <updated>1789112434315</updated>
-    </task>
-    <task id="LOCAL-00013" summary=" MAJ2">
-      <option name="closed" value="true" />
-      <created>1789112890140</created>
-      <option name="number" value="00013" />
-      <option name="presentableId" value="LOCAL-00013" />
-      <option name="project" value="LOCAL" />
-      <updated>1789112890140</updated>
-    </task>
-    <task id="LOCAL-00014" summary=" MAJ2">
-      <option name="closed" value="true" />
-      <created>1789113557484</created>
-      <option name="number" value="00014" />
-      <option name="presentableId" value="LOCAL-00014" />
-      <option name="project" value="LOCAL" />
-      <updated>1789113557484</updated>
-    </task>
-    <task id="LOCAL-00015" summary="Trajectoire">
-      <option name="closed" value="true" />
-      <created>1789113599194</created>
-      <option name="number" value="00015" />
-      <option name="presentableId" value="LOCAL-00015" />
-      <option name="project" value="LOCAL" />
-      <updated>1789113599194</updated>
-    </task>
-    <task id="LOCAL-00016" summary="interface">
-      <option name="closed" value="true" />
-      <created>1789114644534</created>
-      <option name="number" value="00016" />
-      <option name="presentableId" value="LOCAL-00016" />
-      <option name="project" value="LOCAL" />
-      <updated>1789114644534</updated>
-    </task>
-    <task id="LOCAL-00017" summary="interface">
-      <option name="closed" value="true" />
-      <created>1789114806861</created>
-      <option name="number" value="00017" />
-      <option name="presentableId" value="LOCAL-00017" />
-      <option name="project" value="LOCAL" />
-      <updated>1789114806861</updated>
-    </task>
-    <task id="LOCAL-00018" summary="interface">
-      <option name="closed" value="true" />
-      <created>1789114993690</created>
-      <option name="number" value="00018" />
-      <option name="presentableId" value="LOCAL-00018" />
-      <option name="project" value="LOCAL" />
-      <updated>1789114993690</updated>
-    </task>
-    <task id="LOCAL-00019" summary="interface">
-      <option name="closed" value="true" />
-      <created>1789115145746</created>
-      <option name="number" value="00019" />
-      <option name="presentableId" value="LOCAL-00019" />
-      <option name="project" value="LOCAL" />
-      <updated>1789115145746</updated>
-    </task>
-    <task id="LOCAL-00020" summary="MISE A JOUR TOTAL">
-      <option name="closed" value="true" />
-      <created>1789117793138</created>
-      <option name="number" value="00020" />
-      <option name="presentableId" value="LOCAL-00020" />
-      <option name="project" value="LOCAL" />
-      <updated>1789117793138</updated>
-    </task>
-    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
-  </component>
-  <component name="Vcs.Log.Tabs.Properties">
-    <option name="TAB_STATES">
-      <map>
-        <entry key="MAIN">
-          <value>
-            <State>
-              <option name="FILTERS">
-                <map>
-                  <entry key="branch">
-                    <value>
-                      <list>
-                        <option value="feature/config" />
-                      </list>
-                    </value>
-                  </entry>
-                </map>
-              </option>
-            </State>
-          </value>
-        </entry>
-      </map>
-    </option>
-  </component>
-  <component name="VcsManagerConfiguration">
-    <MESSAGE value="INITIALISATION" />
-    <MESSAGE value="Main" />
-    <MESSAGE value="Nouvelles modifications :&#10;&#10;Belle piste&#10;Cap cohérent" />
-    <MESSAGE value="Test neuf" />
-    <MESSAGE value=" MAJ" />
-    <MESSAGE value=" MAJ2" />
-    <MESSAGE value="Trajectoire" />
-    <MESSAGE value="interface" />
-    <MESSAGE value="MISE A JOUR TOTAL" />
-    <option name="LAST_COMMIT_MESSAGE" value="MISE A JOUR TOTAL" />
-  </component>
-  <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/GP211_1_0$avion.coverage" NAME="avion Coverage Results" MODIFIED="1789114871521" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/models" />
-    <SUITE FILE_PATH="coverage/GP211_1_0$main.coverage" NAME="main Coverage Results" MODIFIED="1789118531774" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/GP211_1_0$main_window.coverage" NAME="main_window Coverage Results" MODIFIED="1789112410873" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ui" />
-    <SUITE FILE_PATH="coverage/GP211_1_0$radar_widget.coverage" NAME="radar_widget Coverage Results" MODIFIED="1789117612808" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/ui" />
   </component>
 </project>

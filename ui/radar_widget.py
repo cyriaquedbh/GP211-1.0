@@ -11,7 +11,8 @@ from PySide6.QtGui import (
 )
 from PySide6.QtWidgets import QWidget
 
-from ui.trajectoire import dessiner_trajectoire, piste_la_plus_proche
+from config.unites import ECHELLE_METRES_PAR_UNITE
+from ui.trajectoire import dessiner_trajectoire
 
 
 class RadarWidget(QWidget):
@@ -143,7 +144,7 @@ class RadarWidget(QWidget):
         for idx, rayon in enumerate(rayons):
             painter.setPen(QPen(self.radar_cercle, 1, Qt.DashLine))
             painter.drawEllipse(QPointF(0, 0), rayon, rayon)
-            self._dessiner_texte(painter, f"{(idx + 1) * 5}NM", 5, -rayon + 12, QColor(16, 185, 129, 140))
+            self._dessiner_texte(painter, f"{rayon * ECHELLE_METRES_PAR_UNITE / 1000:g}KM", 5, -rayon + 12, QColor(16, 185, 129, 140))
 
         painter.setPen(QPen(self.radar_repere, 1))
         for angle in range(0, 360, 30):
@@ -172,7 +173,7 @@ class RadarWidget(QWidget):
         painter.setPen(QPen(QColor(56, 189, 248), 1.5))
         painter.drawEllipse(QPointF(0, 0), 22, 22)
 
-        painter.rotate(vent.direction)
+        painter.rotate(vent.direction + 180)  # la flèche indique où le vent souffle (direction d'origine + 180°)
         painter.setPen(QPen(QColor(56, 189, 248), 2))
         painter.drawLine(0, -14, 0, 14)
         painter.drawLine(0, -14, -5, -6)
@@ -180,14 +181,14 @@ class RadarWidget(QWidget):
 
         painter.restore()
 
-        self._dessiner_texte(painter, f"WIND {vent.direction:03d}° / {vent.vitesse}KT", int(origine.x()), int(origine.y()) + 36, QColor(56, 189, 248), centre=True, gras=True)
+        self._dessiner_texte(painter, f"WIND {vent.direction:03d}° / {vent.vitesse}KM/H", int(origine.x()), int(origine.y()) + 36, QColor(56, 189, 248), centre=True, gras=True)
 
     def _dessiner_trajectoires(self, painter):
         centre = self.engine.centre()
         for avion in self.engine.avions:
             if not avion.selected:
                 continue
-            piste = avion.piste_visee or piste_la_plus_proche(avion, self.engine.aeroport.pistes, centre)
+            piste = avion.piste_visee or self.engine.piste_pour_atterrissage(avion)
             if piste is not None:
                 dessiner_trajectoire(painter, avion, piste, centre)
 
@@ -245,13 +246,13 @@ class RadarWidget(QWidget):
 
             painter.setPen(Qt.NoPen)
             painter.setBrush(QColor(15, 23, 42, 210))
-            painter.drawRoundedRect(pt_label.x(), pt_label.y() - 12, 72, 26, 4, 4)
+            painter.drawRoundedRect(pt_label.x(), pt_label.y() - 12, 100, 26, 4, 4)
 
             painter.setPen(QPen(couleur, 1))
-            painter.drawRoundedRect(pt_label.x(), pt_label.y() - 12, 72, 26, 4, 4)
+            painter.drawRoundedRect(pt_label.x(), pt_label.y() - 12, 100, 26, 4, 4)
 
             self._dessiner_texte(painter, avion.name, pt_label.x() + 4, pt_label.y() - 1, couleur, gras=True)
-            self._dessiner_texte(painter, f"FL{int(avion.altitude//100):03d} {int(avion.vitesse)}KT", pt_label.x() + 4, pt_label.y() + 10, QColor(226, 232, 240))
+            self._dessiner_texte(painter, f"{int(avion.altitude)}M {int(avion.vitesse)}KM/H", pt_label.x() + 4, pt_label.y() + 10, QColor(226, 232, 240))
 
     def _dessiner_interface(self, painter):
         painter.setPen(QPen(QColor(56, 189, 248, 80), 1))

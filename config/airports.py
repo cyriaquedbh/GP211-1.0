@@ -1,12 +1,7 @@
+import math
 from dataclasses import dataclass, field
 
-# 1 unité radar = 20 mètres réels
-ECHELLE_METRES_PAR_UNITE = 20
-
-
-def m_vers_radar(longueur_m: int) -> int:
-    """Convertit une distance en mètres vers l'échelle d'affichage radar."""
-    return round(longueur_m / ECHELLE_METRES_PAR_UNITE)
+from config.unites import ECHELLE_METRES_PAR_UNITE, m_vers_radar  # noqa: F401 (ré-exports)
 
 
 @dataclass
@@ -26,6 +21,31 @@ class Piste:
             centre_aeroport[0] + self.decalage_x,
             centre_aeroport[1] + self.decalage_y,
         )
+
+    def direction(self) -> tuple[float, float]:
+        """Vecteur unitaire (x, y) de l'axe de piste, dans le repère écran (y vers le bas)."""
+        rad = math.radians(self.cap)
+        return math.sin(rad), -math.cos(rad)
+
+    def position_relative(
+        self, x: float, y: float, centre_aeroport: tuple[int, int]
+    ) -> tuple[float, float]:
+        """(projection le long de l'axe, écart latéral) d'un point par rapport au centre de piste."""
+        cx, cy = self.centre(centre_aeroport)
+        dir_x, dir_y = self.direction()
+        rel_x, rel_y = x - cx, y - cy
+        projection = rel_x * dir_x + rel_y * dir_y
+        ecart_lateral = -rel_x * dir_y + rel_y * dir_x
+        return projection, ecart_lateral
+
+    @staticmethod
+    def sens_approche(projection: float) -> int:
+        """+1 : approche par le côté « arrière » de l'axe (atterrit au cap de piste), -1 : sens inverse."""
+        return 1 if projection < 0 else -1
+
+    def cap_atterrissage(self, sens: int) -> int:
+        """Cap suivi à l'atterrissage pour un sens d'approche donné."""
+        return self.cap if sens == 1 else self.cap_oppose()
 
 
 @dataclass

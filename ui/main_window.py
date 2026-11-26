@@ -1,203 +1,73 @@
+from PySide6.QtCore import QDateTime, QElapsedTimer, QTimer, Qt
+from PySide6.QtGui import QBrush, QColor, QFont
 from PySide6.QtWidgets import (
-    QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
-    QLabel, QPushButton, QListWidget, QSlider, QGroupBox,
-    QFrame, QListWidgetItem
+    QFrame,
+    QGroupBox,
+    QHBoxLayout,
+    QLabel,
+    QListWidget,
+    QListWidgetItem,
+    QMainWindow,
+    QMessageBox,
+    QPushButton,
+    QSlider,
+    QVBoxLayout,
+    QWidget,
 )
-from PySide6.QtCore import QTimer, Qt, QTime
-from PySide6.QtGui import QColor, QFont
 
+from config.airports import Aeroport
+from controllers.instructions import (
+    Attendre,
+    Atterrir,
+    ChangerCap,
+    Descendre,
+    Instruction,
+    Monter,
+    Retour,
+)
 from controllers.simulation_engine import SimulationEngine
-from controllers.instructions import ChangerCap, Monter, Descendre, Atterrir, Attendre
-from ui.radar_widget import RadarWidget
+from models.avion import Avion
+from ui import styles
 from ui.cockpit_widget import CockpitWidget
-
-
-STYLE_GLOBAL = """
-QMainWindow {
-    background-color: #0b0f17;
-}
-
-QWidget {
-    color: #c5d1de;
-    font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
-}
-
-QGroupBox {
-    background-color: #121824;
-    border: 1px solid #1e293b;
-    border-radius: 10px;
-    margin-top: 14px;
-    padding: 14px 10px 10px 10px;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 1.2px;
-    color: #64748b;
-}
-
-QGroupBox::title {
-    subcontrol-origin: margin;
-    left: 14px;
-    padding: 0 8px;
-    background-color: #121824;
-    color: #38bdf8;
-    text-transform: uppercase;
-}
-
-QLabel {
-    color: #cbd5e1;
-}
-
-QListWidget {
-    background-color: #0d121d;
-    border: 1px solid #1e293b;
-    border-radius: 8px;
-    outline: none;
-    padding: 6px;
-    font-size: 12px;
-}
-
-QListWidget::item {
-    background-color: #161f2e;
-    border: 1px solid #222f43;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 6px;
-    color: #94a3b8;
-}
-
-QListWidget::item:hover {
-    background-color: #1e2a3e;
-    border-color: #3b82f6;
-    color: #f8fafc;
-}
-
-QListWidget::item:selected {
-    background-color: #1e3a5f;
-    border: 1px solid #38bdf8;
-    color: #ffffff;
-}
-
-QSlider::groove:horizontal {
-    height: 8px;
-    background: #162032;
-    border: 1px solid #26334d;
-    border-radius: 4px;
-}
-
-QSlider::sub-page:horizontal {
-    background: qlineargradient(x1:0, y1:0, x2:1, y2:0, stop:0 #0284c7, stop:1 #38bdf8);
-    border-radius: 4px;
-}
-
-QSlider::handle:horizontal {
-    width: 20px;
-    height: 20px;
-    margin: -6px 0;
-    background: #f8fafc;
-    border: 2px solid #38bdf8;
-    border-radius: 10px;
-}
-
-QPushButton {
-    background-color: #162235;
-    border: 1px solid #25354e;
-    border-radius: 6px;
-    color: #e2e8f0;
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    padding: 10px 14px;
-    min-height: 32px;
-}
-
-QPushButton:hover {
-    background-color: #1d2d47;
-    border-color: #38bdf8;
-    color: #ffffff;
-}
-
-QPushButton:pressed {
-    background-color: #0f172a;
-}
-
-QPushButton#btnMonter {
-    border-left: 3px solid #10b981;
-}
-
-QPushButton#btnMonter:hover {
-    background-color: #064e3b;
-    border-color: #10b981;
-}
-
-QPushButton#btnDescendre {
-    border-left: 3px solid #f59e0b;
-}
-
-QPushButton#btnDescendre:hover {
-    background-color: #78350f;
-    border-color: #f59e0b;
-}
-
-QPushButton#btnAtterrir {
-    background-color: #064e3b;
-    border: 1px solid #059669;
-    color: #a7f3d0;
-}
-
-QPushButton#btnAtterrir:hover {
-    background-color: #047857;
-    border-color: #34d399;
-    color: #ffffff;
-}
-
-QPushButton#btnAttente {
-    background-color: #431407;
-    border: 1px solid #ea580c;
-    color: #ffedd5;
-}
-
-QPushButton#btnAttente:hover {
-    background-color: #7c2d12;
-    border-color: #f97316;
-    color: #ffffff;
-}
-
-QPushButton#btnCockpit {
-    background-color: #1e1b4b;
-    border: 1px solid #6366f1;
-    color: #c7d2fe;
-}
-
-QPushButton#btnCockpit:hover {
-    background-color: #312e81;
-    border-color: #818cf8;
-    color: #ffffff;
-}
-"""
+from ui.radar_widget import RadarWidget
 
 
 class SimulateurATC(QMainWindow):
+    PAS_TIMER_MS = 50
+    DT_MAX = 0.25               # s : borne le pas si l'application a été figée (fenêtre déplacée...)
+    DUREE_RETOUR = 4.0          # s d'affichage du retour d'un ordre
 
-    def __init__(self, aeroport):
+    PAS_ALTITUDE_BOUTON = 100   # m
+    PAS_ALTITUDE_CLAVIER = 50   # m
+    PAS_CAP_CLAVIER = 2         # °
+
+    def __init__(self, aeroport: Aeroport) -> None:
         super().__init__()
 
+        self.aeroport = aeroport
         self.setWindowTitle(f"ATC Radar Command — {aeroport.nom}")
         self.setMinimumSize(1280, 760)
 
         self.engine = SimulationEngine(aeroport)
-        self.avion_selectionne = None
-        self.cockpit_dialog = None
+        self.avion_selectionne: Avion | None = None
+        self.cockpit_dialog: CockpitWidget | None = None
+        self._retour_restant = 0.0
 
-        self.setStyleSheet(STYLE_GLOBAL)
+        self.setStyleSheet(styles.STYLE_GLOBAL)
         self.setFocusPolicy(Qt.StrongFocus)
 
         self._init_ui()
 
-        self.timer = QTimer()
+        # La simulation avance au temps réel mesuré, pas à un pas supposé constant.
+        self._chrono = QElapsedTimer()
+        self._chrono.start()
+        self.timer = QTimer(self)
         self.timer.timeout.connect(self._boucle_simulation)
-        self.timer.start(50)
+        self.timer.start(self.PAS_TIMER_MS)
 
-    def _init_ui(self):
+    # ------------------------------------------------------------------ construction UI
+
+    def _init_ui(self) -> None:
         main_widget = QWidget()
         main_layout = QHBoxLayout(main_widget)
         main_layout.setContentsMargins(16, 16, 16, 16)
@@ -210,10 +80,10 @@ class SimulateurATC(QMainWindow):
         header_layout.setSpacing(2)
 
         titre = QLabel("AIR TRAFFIC CONTROL")
-        titre.setStyleSheet("font-size: 18px; font-weight: 900; color: #f8fafc; letter-spacing: 1.5px;")
+        titre.setStyleSheet(styles.STYLE_TITRE)
 
         sous_titre = QLabel("MONITORING SYSTEM")
-        sous_titre.setStyleSheet("font-size: 10px; font-weight: 800; color: #0284c7; letter-spacing: 2px;")
+        sous_titre.setStyleSheet(styles.STYLE_SOUS_TITRE)
 
         header_layout.addWidget(titre)
         header_layout.addWidget(sous_titre)
@@ -224,13 +94,13 @@ class SimulateurATC(QMainWindow):
         info_layout.setSpacing(8)
 
         self.lbl_heure = QLabel("UTC : --:--:--")
-        self.lbl_heure.setStyleSheet("font-size: 13px; font-weight: 700; font-family: 'Consolas', monospace; color: #38bdf8; background-color: #0f172a; padding: 6px 10px; border-radius: 4px; border: 1px solid #1e293b;")
+        self.lbl_heure.setStyleSheet(styles.STYLE_HEURE)
 
         self.lbl_vent = QLabel("VENT : ---° / --- km/h")
-        self.lbl_vent.setStyleSheet("font-size: 11px; font-weight: 600; font-family: 'Consolas', monospace; color: #94a3b8; background-color: #0f172a; padding: 6px 10px; border-radius: 4px; border: 1px solid #1e293b;")
+        self.lbl_vent.setStyleSheet(styles.STYLE_VENT)
 
         self.lbl_stats = QLabel(f"SCORE : {self.engine.score}")
-        self.lbl_stats.setStyleSheet("font-size: 12px; font-weight: 800; color: #34d399; background-color: #064e3b; padding: 8px 10px; border-radius: 4px; border: 1px solid #059669;")
+        self.lbl_stats.setStyleSheet(styles.STYLE_STATS_OK)
 
         info_layout.addWidget(self.lbl_heure)
         info_layout.addWidget(self.lbl_vent)
@@ -252,7 +122,7 @@ class SimulateurATC(QMainWindow):
         left_panel.addWidget(avions_group, 1)
 
         radar_container = QFrame()
-        radar_container.setStyleSheet("QFrame { background-color: #05080c; border: 1px solid #1e293b; border-radius: 12px; }")
+        radar_container.setStyleSheet(styles.STYLE_RADAR_CONTENEUR)
         radar_layout = QVBoxLayout(radar_container)
         radar_layout.setContentsMargins(6, 6, 6, 6)
 
@@ -268,26 +138,28 @@ class SimulateurATC(QMainWindow):
 
         self.lbl_avion = QLabel("AUCUNE CIBLE SÉLECTIONNÉE")
         self.lbl_avion.setAlignment(Qt.AlignCenter)
-        self.lbl_avion.setStyleSheet("background-color: #0f172a; border: 1px dashed #334155; border-radius: 6px; padding: 12px; color: #64748b; font-size: 11px; font-weight: 800;")
+        self.lbl_avion.setStyleSheet(styles.STYLE_AVION_VIDE)
 
         self.lbl_cap = QLabel("CAP : ---°")
         self.lbl_cap.setAlignment(Qt.AlignCenter)
-        self.lbl_cap.setStyleSheet("font-size: 26px; font-weight: 900; font-family: 'Consolas', monospace; color: #f8fafc; background-color: #090d14; border: 1px solid #1e293b; border-radius: 6px; padding: 10px;")
+        self.lbl_cap.setStyleSheet(styles.STYLE_CAP)
 
         self.cap_slider = QSlider(Qt.Horizontal)
         self.cap_slider.setRange(0, 359)
         self.cap_slider.setMinimumHeight(30)
         self.cap_slider.valueChanged.connect(self._cap_slider_change)
 
-        lbl_astuce = QLabel("RACCOURCIS CLAVIER (Maintien fluide)\n◄ / ► : Ajuster le cap\n▲ / ▼ : Ajuster l'altitude")
+        lbl_astuce = QLabel(
+            "RACCOURCIS CLAVIER (Maintien fluide)\n◄ / ► : Ajuster le cap\n▲ / ▼ : Ajuster l'altitude"
+        )
         lbl_astuce.setAlignment(Qt.AlignCenter)
-        lbl_astuce.setStyleSheet("color: #475569; font-size: 10px; font-weight: 600; background-color: #0f172a; border-radius: 4px; padding: 6px;")
+        lbl_astuce.setStyleSheet(styles.STYLE_ASTUCE)
 
-        btn_up = QPushButton("▲   MONTER  (+100m)")
+        btn_up = QPushButton(f"▲   MONTER  (+{self.PAS_ALTITUDE_BOUTON}m)")
         btn_up.setObjectName("btnMonter")
         btn_up.clicked.connect(lambda: self._executer(Monter))
 
-        btn_down = QPushButton("▼   DESCENDRE  (-100m)")
+        btn_down = QPushButton(f"▼   DESCENDRE  (-{self.PAS_ALTITUDE_BOUTON}m)")
         btn_down.setObjectName("btnDescendre")
         btn_down.clicked.connect(lambda: self._executer(Descendre))
 
@@ -303,6 +175,12 @@ class SimulateurATC(QMainWindow):
         btn_cockpit.setObjectName("btnCockpit")
         btn_cockpit.clicked.connect(self._ouvrir_vue_cockpit)
 
+        self.lbl_retour = QLabel("")
+        self.lbl_retour.setAlignment(Qt.AlignCenter)
+        self.lbl_retour.setWordWrap(True)
+        self.lbl_retour.setMinimumHeight(40)
+        self.lbl_retour.setStyleSheet(styles.STYLE_RETOUR_VIDE)
+
         controls_layout.addWidget(self.lbl_avion)
         controls_layout.addSpacing(4)
         controls_layout.addWidget(self.lbl_cap)
@@ -316,6 +194,8 @@ class SimulateurATC(QMainWindow):
         controls_layout.addWidget(btn_land)
         controls_layout.addWidget(btn_hold)
         controls_layout.addWidget(btn_cockpit)
+        controls_layout.addSpacing(4)
+        controls_layout.addWidget(self.lbl_retour)
 
         controls_group.setLayout(controls_layout)
         right_panel.addWidget(controls_group)
@@ -327,106 +207,147 @@ class SimulateurATC(QMainWindow):
 
         self.setCentralWidget(main_widget)
 
-    def _selection_via_radar(self, avion):
+    # ------------------------------------------------------------------ sélection
+
+    def _selection_via_radar(self, avion: Avion) -> None:
         self.engine.selectionner(avion)
         self.avion_selectionne = avion
         self._synchroniser_slider(avion.target_cap)
         self._mettre_a_jour_avion_selectionne()
 
-    def _selection_via_liste(self, item):
-        name = item.text().split("\n")[0].replace("✈ ", "").strip()
-        for avion in self.engine.avions:
-            if avion.name == name:
-                self._selection_via_radar(avion)
-                break
+    def _selection_via_liste(self, item: QListWidgetItem) -> None:
+        avion = item.data(Qt.UserRole)
+        if avion in self.engine.avions:
+            self._selection_via_radar(avion)
 
-    def _mettre_a_jour_avion_selectionne(self):
+    def _mettre_a_jour_avion_selectionne(self) -> None:
         if not self.avion_selectionne:
             self.lbl_avion.setText("AUCUNE CIBLE SÉLECTIONNÉE")
-            self.lbl_avion.setStyleSheet("background-color: #0f172a; border: 1px dashed #334155; border-radius: 6px; padding: 12px; color: #64748b; font-size: 11px; font-weight: 800;")
+            self.lbl_avion.setStyleSheet(styles.STYLE_AVION_VIDE)
             return
 
         avion = self.avion_selectionne
-        statut = " [HOLDING]" if avion.is_holding else ""
+        statut = ""
+        if avion.is_holding:
+            statut = " [HOLDING]"
+        elif avion.is_landing:
+            statut = " [APPROCHE]"
         self.lbl_avion.setText(f"✈ {avion.name}{statut}\nALTITUDE: {int(avion.altitude)} m")
-        self.lbl_avion.setStyleSheet("background-color: #0c4a6e; border: 1px solid #38bdf8; border-radius: 6px; padding: 10px; color: #f0f9ff; font-size: 12px; font-weight: 800;")
+        self.lbl_avion.setStyleSheet(styles.STYLE_AVION_ACTIF)
 
-    def _synchroniser_slider(self, valeur_cap):
+    def _synchroniser_slider(self, valeur_cap: float) -> None:
         self.cap_slider.blockSignals(True)
         self.cap_slider.setValue(int(valeur_cap))
         self.cap_slider.blockSignals(False)
         self.lbl_cap.setText(f"CAP : {int(valeur_cap):03d}°")
 
-    def _cap_slider_change(self, valeur):
+    # ------------------------------------------------------------------ ordres
+
+    def _appliquer(self, instruction: Instruction) -> Retour:
+        retour = instruction.executer()
+        self._afficher_retour(retour)
+        return retour
+
+    def _afficher_retour(self, retour: Retour) -> None:
+        self.lbl_retour.setText(retour.message)
+        self.lbl_retour.setStyleSheet(
+            styles.STYLE_RETOUR_OK if retour.ok else styles.STYLE_RETOUR_ERREUR
+        )
+        self._retour_restant = self.DUREE_RETOUR
+
+    def _cap_slider_change(self, valeur: int) -> None:
         self.lbl_cap.setText(f"CAP : {valeur:03d}°")
         if self.avion_selectionne:
-            ChangerCap(self.avion_selectionne, valeur).executer()
+            retour = ChangerCap(self.avion_selectionne, valeur).executer()
+            # Le glissement génère de nombreux ordres : on n'affiche que les annulations.
+            if retour.annulations:
+                self._afficher_retour(retour)
 
-    def _executer(self, classe_instruction):
-        if not self.avion_selectionne:
+    def _executer(self, classe_instruction: type[Instruction]) -> None:
+        avion = self.avion_selectionne
+        if avion is None:
             return
 
         if classe_instruction is Atterrir:
-            piste = self.engine.piste_la_plus_proche(self.avion_selectionne)
-            Atterrir(self.avion_selectionne, piste).executer()
-        elif classe_instruction is Attendre:
-            Attendre(self.avion_selectionne).executer()
+            piste = self.engine.piste_pour_atterrissage(avion)
+            instruction = Atterrir(avion, piste, self.engine.vent, self.engine.centre())
         elif classe_instruction in (Monter, Descendre):
-            classe_instruction(self.avion_selectionne, delta=100).executer()
+            instruction = classe_instruction(avion, delta=self.PAS_ALTITUDE_BOUTON)
         else:
-            classe_instruction(self.avion_selectionne).executer()
+            instruction = classe_instruction(avion)
 
-    def _ouvrir_vue_cockpit(self):
-        if self.avion_selectionne:
-            self.cockpit_dialog = CockpitWidget(
-                self.avion_selectionne, self.engine, self
-            )
-            self.cockpit_dialog.show()
+        self._appliquer(instruction)
 
-    def keyPressEvent(self, event):
-        if self.avion_selectionne:
-            if event.key() == Qt.Key_Left:
-                self.avion_selectionne.ajuster_cap(-2)
-                self._synchroniser_slider(self.avion_selectionne.target_cap)
+    def keyPressEvent(self, event) -> None:
+        avion = self.avion_selectionne
+        if avion is not None:
+            touche = event.key()
+
+            if touche in (Qt.Key_Left, Qt.Key_Right):
+                delta = -self.PAS_CAP_CLAVIER if touche == Qt.Key_Left else self.PAS_CAP_CLAVIER
+                self._appliquer(ChangerCap(avion, avion.target_cap + delta))
+                self._synchroniser_slider(avion.target_cap)
                 return
 
-            if event.key() == Qt.Key_Right:
-                self.avion_selectionne.ajuster_cap(2)
-                self._synchroniser_slider(self.avion_selectionne.target_cap)
+            if touche == Qt.Key_Up:
+                self._appliquer(Monter(avion, self.PAS_ALTITUDE_CLAVIER))
                 return
 
-            if event.key() == Qt.Key_Up:
-                self.avion_selectionne.monter(50)
-                return
-
-            if event.key() == Qt.Key_Down:
-                self.avion_selectionne.descendre(50)
+            if touche == Qt.Key_Down:
+                self._appliquer(Descendre(avion, self.PAS_ALTITUDE_CLAVIER))
                 return
 
         super().keyPressEvent(event)
 
-    def _boucle_simulation(self):
-        self.lbl_heure.setText("UTC : " + QTime.currentTime().toString("HH:mm:ss"))
-        self.lbl_vent.setText(f"VENT : {self.engine.vent.direction:03d}° / {self.engine.vent.vitesse} km/h")
+    # ------------------------------------------------------------------ cockpit
 
-        collision = self.engine.maj(0.1)
+    def _ouvrir_vue_cockpit(self) -> None:
+        if self.avion_selectionne:
+            self.cockpit_dialog = CockpitWidget(self.avion_selectionne, self.engine, self)
+            self.cockpit_dialog.show()
 
-        if self.avion_selectionne not in self.engine.avions:
-            self.avion_selectionne = None
-            self._mettre_a_jour_avion_selectionne()
-        else:
-            self._synchroniser_slider(self.avion_selectionne.target_cap)
+    def _fermer_cockpit(self) -> None:
+        if self.cockpit_dialog is not None:
+            self.cockpit_dialog.close()
+            self.cockpit_dialog = None
 
-        self.list_avions.clear()
-        for avion in self.engine.avions:
-            texte_carte = (
-                f"✈ {avion.name}\n"
-                f"ALT : {int(avion.altitude)} m   |   SPD : {avion.vitesse} km/h\n"
-                f"CAP : {int(avion.cap):03d}°    |   FUEL : {int(avion.fuel)}%"
-            )
-            item = QListWidgetItem(texte_carte)
-            item.setFont(QFont("Consolas", 9))
-            self.list_avions.addItem(item)
+    # ------------------------------------------------------------------ rafraîchissement
+
+    @staticmethod
+    def _texte_carte(avion: Avion) -> str:
+        statut = ""
+        if avion.is_holding:
+            statut = "  ↻ ATTENTE"
+        elif avion.is_landing:
+            statut = "  ▸ APPROCHE"
+        if avion.carburant_faible:
+            statut += "  ⛽ FUEL BAS"
+
+        return (
+            f"✈ {avion.name}{statut}\n"
+            f"ALT : {int(avion.altitude)} m   |   SPD : {int(avion.vitesse)} km/h\n"
+            f"CAP : {int(avion.cap):03d}°    |   FUEL : {int(avion.fuel)}%"
+        )
+
+    def _rafraichir_liste(self) -> None:
+        """Met à jour les cartes en place ; ne reconstruit la liste que si le trafic a changé."""
+        avions = self.engine.avions
+        presents = [self.list_avions.item(i).data(Qt.UserRole) for i in range(self.list_avions.count())]
+
+        if len(presents) != len(avions) or any(p is not a for p, a in zip(presents, avions)):
+            self.list_avions.clear()
+            for avion in avions:
+                item = QListWidgetItem()
+                item.setData(Qt.UserRole, avion)
+                item.setFont(QFont("Consolas", 9))
+                self.list_avions.addItem(item)
+
+        for index, avion in enumerate(avions):
+            item = self.list_avions.item(index)
+
+            texte = self._texte_carte(avion)
+            if item.text() != texte:
+                item.setText(texte)
 
             if avion.selected:
                 item.setBackground(QColor(14, 116, 144))
@@ -434,19 +355,105 @@ class SimulateurATC(QMainWindow):
             elif avion.en_alerte:
                 item.setBackground(QColor(127, 29, 29))
                 item.setForeground(QColor(254, 202, 202))
+            else:
+                item.setBackground(QBrush())
+                item.setForeground(QBrush())
 
-        if collision:
-            self.lbl_stats.setText("⚠ COLLISION DÉTECTÉE !")
-            self.lbl_stats.setStyleSheet("font-size: 12px; font-weight: 800; color: #fca5a5; background-color: #7f1d1d; padding: 8px 10px; border-radius: 4px; border: 1px solid #ef4444;")
-        elif self.engine.dernier_evenement:
-            self.lbl_stats.setText(f"SCORE : {self.engine.score}  •  {self.engine.dernier_evenement}")
-            self.lbl_stats.setStyleSheet("font-size: 12px; font-weight: 800; color: #34d399; background-color: #064e3b; padding: 8px 10px; border-radius: 4px; border: 1px solid #059669;")
+    def _rafraichir_statut(self) -> None:
+        engine = self.engine
+
+        if engine.partie_terminee:
+            self.lbl_stats.setText(f"⚠ {engine.raison_fin} — SCORE : {engine.score}")
+            self.lbl_stats.setStyleSheet(styles.STYLE_STATS_ALERTE)
+            return
+
+        evenement = engine.evenement_recent
+        if evenement:
+            self.lbl_stats.setText(f"SCORE : {engine.score}  •  {evenement}")
+            style = styles.STYLE_STATS_ALERTE if engine.evenement_critique else styles.STYLE_STATS_OK
         else:
-            self.lbl_stats.setText(f"SCORE : {self.engine.score}")
-            self.lbl_stats.setStyleSheet("font-size: 12px; font-weight: 800; color: #34d399; background-color: #064e3b; padding: 8px 10px; border-radius: 4px; border: 1px solid #059669;")
+            self.lbl_stats.setText(f"SCORE : {engine.score}")
+            style = styles.STYLE_STATS_OK
+        self.lbl_stats.setStyleSheet(style)
 
+    def _rafraichir_retour(self, dt: float) -> None:
+        if self._retour_restant <= 0:
+            return
+        self._retour_restant -= dt
+        if self._retour_restant <= 0:
+            self.lbl_retour.setText("")
+            self.lbl_retour.setStyleSheet(styles.STYLE_RETOUR_VIDE)
+
+    def _boucle_simulation(self) -> None:
+        dt = min(self._chrono.restart() / 1000.0, self.DT_MAX)
+
+        self.lbl_heure.setText("UTC : " + QDateTime.currentDateTimeUtc().toString("HH:mm:ss"))
+        self.lbl_vent.setText(
+            f"VENT : {self.engine.vent.direction:03d}° / {self.engine.vent.vitesse} km/h"
+        )
+
+        self.engine.maj(dt)
+
+        if self.avion_selectionne not in self.engine.avions:
+            self.avion_selectionne = None
+            self._mettre_a_jour_avion_selectionne()
+        else:
+            self._synchroniser_slider(self.avion_selectionne.target_cap)
+
+        if self.cockpit_dialog is not None and self.cockpit_dialog.avion not in self.engine.avions:
+            self._fermer_cockpit()
+
+        self._rafraichir_liste()
+        self._rafraichir_statut()
         self._mettre_a_jour_avion_selectionne()
+        self._rafraichir_retour(dt)
         self.radar.update()
 
         if self.cockpit_dialog and self.cockpit_dialog.isVisible():
             self.cockpit_dialog.update()
+
+        if self.engine.partie_terminee:
+            self._fin_de_partie()
+
+    # ------------------------------------------------------------------ fin / nouvelle partie
+
+    def _fin_de_partie(self) -> None:
+        self.timer.stop()
+
+        engine = self.engine
+        minutes, secondes = divmod(int(engine.temps_ecoule), 60)
+
+        boite = QMessageBox(self)
+        boite.setIcon(QMessageBox.Warning)
+        boite.setWindowTitle("Fin de partie")
+        boite.setText(f"{engine.raison_fin}")
+        boite.setInformativeText(
+            f"Score : {engine.score}\n"
+            f"Atterrissages réussis : {engine.atterrissages_reussis}\n"
+            f"Appareils perdus : {engine.crashes}\n"
+            f"Sorties de secteur : {engine.sorties_secteur}\n"
+            f"Durée : {minutes:02d}:{secondes:02d}"
+        )
+        bouton_rejouer = boite.addButton("Rejouer", QMessageBox.AcceptRole)
+        boite.addButton("Quitter", QMessageBox.RejectRole)
+        boite.exec()
+
+        if boite.clickedButton() is bouton_rejouer:
+            self._nouvelle_partie()
+        else:
+            self.close()
+
+    def _nouvelle_partie(self) -> None:
+        self._fermer_cockpit()
+        self.engine = SimulationEngine(self.aeroport)
+        self.avion_selectionne = None
+        self.radar.engine = self.engine
+        self.radar.recentrer()
+        self.list_avions.clear()
+        self._mettre_a_jour_avion_selectionne()
+        self._retour_restant = 0.0
+        self.lbl_retour.setText("")
+        self.lbl_retour.setStyleSheet(styles.STYLE_RETOUR_VIDE)
+
+        self._chrono.restart()
+        self.timer.start(self.PAS_TIMER_MS)
